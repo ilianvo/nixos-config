@@ -7,7 +7,7 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-       <nixos-hardware/lenovo/thinkpad/t495>
+      # <nixos-hardware/lenovo/thinkpad/t495>
       ./hardware-configuration.nix
       ./vm.nix
     ];
@@ -15,8 +15,10 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.kernelModules = ["hid-universal-pidff"];
+  boot.kernelParams = [ "amdgpu.ppfeaturemask=0xffffffff" ];
 
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "nixguru"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -26,6 +28,23 @@
   # Enable networking
   networking.networkmanager.enable = true;
 
+  systemd.sleep.settings.Sleep = {
+  AllowSuspend = "no";
+  AllowHibernation = "no";
+  AllowHybridSleep = "no";
+  AllowSuspendThenHibernate = "no";
+};
+
+services.logind.settings.Login = {
+  HandleLidSwitch = "ignore";
+  HandleLidSwitchDocked = "ignore";
+  HandleLidSwitchExternalPower = "ignore";
+  HandlePowerKey = "ignore";
+  HandleSuspendKey = "ignore";
+  HandleHibernateKey = "ignore";
+  # Optional: disable idle sleep
+  IdleAction = "ignore";
+};
   # Set your time zone.
   time.timeZone = "Europe/Sofia";
 
@@ -44,6 +63,10 @@
     LC_TIME = "bg_BG.UTF-8";
   };
 
+
+services.netbird = {
+  enable = true;                    # Enables the CLI and core service
+};
   # Enable the X11 windowing system.
   # You can disable this if you're only using the Wayland session.
   services.xserver.enable = true;
@@ -51,27 +74,26 @@
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
-  services.xserver.desktopManager.gnome.enable = false;
-  services.gnome.gnome-keyring.enable = false;
 
   services.tlp.enable = false;
   services.power-profiles-daemon.enable = true;
-
-  services.fprintd.enable = true;
-  services.fprintd.tod.enable = true;
-  services.fprintd.tod.driver = pkgs.libfprint-2-tod1-vfs0090;
 
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";
     variant = "";
   };
+  
+  # Enable lact for GPU monitoring
+  services.lact.enable = true;
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
+  hardware.bluetooth.enable = true;
+  services.blueman.enable = true;
 
   # Enable sound with pipewire.
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -90,14 +112,12 @@
   # services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.hanov = {
+  users.users.kaimata9 = {
     isNormalUser = true;
-    description = "hanov";
-    extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-      kdePackages.kate
-    #  thunderbird
-    ];
+    description = "kaimata9";
+    extraGroups = [ "networkmanager" "wheel" "video" "render" ];
+    # User packages moved to Home Manager (home.nix) for better separation.
+    # packages = with pkgs; [ ];
   };
 
   # Install firefox.
@@ -107,59 +127,78 @@
   programs.steam.gamescopeSession.enable = true;
   programs.gamemode.enable = true;
 
-programs.git = {
-  config.credential.helper = "manager";
-  config.credential."https://github.com".username = "ilianvo";
-  config.credential.credentialStore = "cache";
+  # Git configuration moved to Home Manager (see home.nix) for proper per-user setup.
+
+
+services.ollama = {
   enable = true;
+  host = "0.0.0.0";  # listen on all interfaces, not just localhost
+  port = 11434;      # default, change if you want
+  package = pkgs.ollama-rocm;
+  # Optional: preload popular models
+    environmentVariables = {
+    HSA_OVERRIDE_GFX_VERSION = "10.1.0";   # Key workaround for 5700 XT (gfx1010)
+    # HCC_AMDGPU_TARGET = "gfx1010";       # Sometimes needed, try if above isn't enough
+  };
+
 };
 
+boot.initrd.kernelModules = [ "amdgpu" ];
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
-
+  nixpkgs.config.allowBroken = true;
   # List packages installed in system profile. To search, run:
   # $ nix search wget
+  #
+  # Most personal/GUI/user applications have been moved to Home Manager
+  # (see home.nix). Keep here only system-level, core tools, and desktop
+  # integration packages needed for the base system / multiple contexts.
   environment.systemPackages = with pkgs; [
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
-   pkgs.obsidian
-   pkgs.floorp
-   pkgs.vscodium
-   pkgs.mpv
-   pkgs.qbittorrent
-   pkgs.zoom-us
-   pkgs.syncthing
-   pkgs.telegram-desktop
-   pkgs.exodus
-   pkgs.signal-desktop
-   pkgs.bitwarden-desktop
-   pkgs.woeusb
-   pkgs.kdePackages.plasma-nm
-   pkgs.kdePackages.networkmanager-qt
-   pkgs.kdePackages.modemmanager-qt
-   pkgs.networkmanager
-   pkgs.networkmanagerapplet
-   pkgs.pptp
-   pkgs.ppp
-   pkgs.steam
-   pkgs.github-desktop
-   pkgs.mangohud
-   pkgs.protonup
-   pkgs.mission-center
-   pkgs.openfortivpn
-   pkgs.fprintd
-   pkgs.gh
-   pkgs.git
-   pkgs.fastfetch
-   pkgs.btop
-   pkgs.iftop
-   pkgs.strawberry
-   pkgs.git-credential-manager
+    # Core editors / fetch / helpers (useful at system level)
+    vim
+    wget
+    python3
+    git
+    fastfetch
+    btop
+    iftop
+    nh
+    screen
+    nettools
+    dos2unix
+    warp-terminal
+    smartmontools
+    # Archivers / utils
+    unrar
+    p7zip
+    dmg2img
+    tesseract
+    cabextract
+    libguestfs-with-appliance
+
+    # Gaming / hardware related tools that make sense system-wide
+    oversteer
+    linuxConsoleTools
+
+    # Networking / connectivity (Plasma + NetworkManager integration, VPN)
+    kdePackages.plasma-nm
+    kdePackages.networkmanager-qt
+    kdePackages.modemmanager-qt
+    networkmanager
+    networkmanagerapplet
+
+    # Steam integration bits
+    steam
+    gh
+
   ];
  environment.sessionVariables = {
     STEAM_EXTRA_COMPAT_TOOLS_PATHS =
       "\${HOME}/.steam/root/compatibilitytools.d";
 };
+
+
+hardware.steam-hardware.enable = true;
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
@@ -167,18 +206,18 @@ programs.git = {
   #   enable = true;
   #   enableSSHSupport = true;
   # };
-#nix.settings.experimental-features = [ "nix-command" "flakes" ];
+nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+   services.openssh.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
+   networking.firewall.enable = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
@@ -186,7 +225,6 @@ programs.git = {
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "24.11"; # Did you read the comment?
+  system.stateVersion = "26.05"; # Did you read the comment?
 
 }
-
