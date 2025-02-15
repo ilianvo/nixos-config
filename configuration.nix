@@ -7,7 +7,7 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-       <nixos-hardware/lenovo/thinkpad/t495>
+      # <nixos-hardware/lenovo/thinkpad/t495>
       ./hardware-configuration.nix
       ./vm.nix
     ];
@@ -167,7 +167,7 @@ programs.git = {
   #   enable = true;
   #   enableSSHSupport = true;
   # };
-#nix.settings.experimental-features = [ "nix-command" "flakes" ];
+nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # List services that you want to enable:
 
