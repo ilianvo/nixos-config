@@ -16,7 +16,7 @@ Basic familiarity with Nix and NixOS.
  1 Clone the Repository:
     
 
-    git clone https://github.com/your-username/nixos-config.git
+    git clone https://github.com/ilianvo/nixos-config.git
     cd nixos-config
 
  2 Apply the Configuration:
