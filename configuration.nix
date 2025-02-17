@@ -129,7 +129,6 @@ programs.git = {
    pkgs.qbittorrent
    pkgs.zoom-us
    pkgs.syncthing
-   pkgs.telegram-desktop
    pkgs.exodus
    pkgs.signal-desktop
    pkgs.bitwarden-desktop
@@ -155,6 +154,8 @@ programs.git = {
    pkgs.iftop
    pkgs.strawberry
    pkgs.git-credential-manager
+   pkgs.wireguard-ui
+   pkgs.wireguard-tools
   ];
  environment.sessionVariables = {
     STEAM_EXTRA_COMPAT_TOOLS_PATHS =
@@ -178,7 +179,7 @@ nix.settings.experimental-features = [ "nix-command" "flakes" ];
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
+   networking.firewall.enable = false;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
