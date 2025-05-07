@@ -129,7 +129,7 @@ programs.git = {
    pkgs.qbittorrent
    pkgs.zoom-us
    pkgs.syncthing
-   pkgs.exodus
+  #pkgs.exodus
    pkgs.signal-desktop
    pkgs.bitwarden-desktop
    pkgs.woeusb
@@ -156,6 +156,7 @@ programs.git = {
    pkgs.git-credential-manager
    pkgs.wireguard-ui
    pkgs.wireguard-tools
+   pkgs.unrar
   ];
  environment.sessionVariables = {
     STEAM_EXTRA_COMPAT_TOOLS_PATHS =
