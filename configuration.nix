@@ -57,8 +57,8 @@
   services.tlp.enable = false;
   services.power-profiles-daemon.enable = true;
 
-  services.fprintd.enable = true;
-  services.fprintd.tod.enable = true;
+  services.fprintd.enable = false;
+  services.fprintd.tod.enable = false;
   services.fprintd.tod.driver = pkgs.libfprint-2-tod1-vfs0090;
 
   # Configure keymap in X11
@@ -71,7 +71,7 @@
   services.printing.enable = true;
 
   # Enable sound with pipewire.
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -116,7 +116,7 @@ programs.git = {
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
-
+  nixpkgs.config.allowBroken = true;
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
