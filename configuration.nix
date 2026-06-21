@@ -15,6 +15,7 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.kernelModules = ["hid-universal-pidff"];
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -51,15 +52,11 @@
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
-  services.xserver.desktopManager.gnome.enable = false;
+  services.desktopManager.gnome.enable = false;
   services.gnome.gnome-keyring.enable = false;
 
   services.tlp.enable = false;
   services.power-profiles-daemon.enable = true;
-
-  services.fprintd.enable = false;
-  services.fprintd.tod.enable = false;
-  services.fprintd.tod.driver = pkgs.libfprint-2-tod1-vfs0090;
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -92,14 +89,12 @@
   # services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.hanov = {
+  users.users.kaimata9 = {
     isNormalUser = true;
-    description = "hanov";
+    description = "kaimata9";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-      kdePackages.kate
-    #  thunderbird
-    ];
+    # User packages moved to Home Manager (home.nix) for better separation.
+    # packages = with pkgs; [ ];
   };
 
   # Install firefox.
@@ -109,61 +104,76 @@
   programs.steam.gamescopeSession.enable = true;
   programs.gamemode.enable = true;
 
-programs.git = {
-  config.credential.helper = "manager";
-  config.credential."https://github.com".username = "ilianvo";
-  config.credential.credentialStore = "cache";
-  enable = true;
-};
+  # Git configuration moved to Home Manager (see home.nix) for proper per-user setup.
+
+nixpkgs.config.permittedInsecurePackages = [
+  "electron-39.8.10"
+];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowBroken = true;
   # List packages installed in system profile. To search, run:
   # $ nix search wget
+  #
+  # Most personal/GUI/user applications have been moved to Home Manager
+  # (see home.nix). Keep here only system-level, core tools, and desktop
+  # integration packages needed for the base system / multiple contexts.
   environment.systemPackages = with pkgs; [
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
-   pkgs.obsidian
-   pkgs.floorp
-   pkgs.vscodium
-   pkgs.mpv
-   pkgs.qbittorrent
-   pkgs.zoom-us
-   pkgs.syncthing
-  #pkgs.exodus
-   pkgs.signal-desktop
-   pkgs.bitwarden-desktop
-   pkgs.woeusb
-   pkgs.kdePackages.plasma-nm
-   pkgs.kdePackages.networkmanager-qt
-   pkgs.kdePackages.modemmanager-qt
-   pkgs.networkmanager
-   pkgs.networkmanagerapplet
-   pkgs.pptp
-   pkgs.ppp
-   pkgs.steam
-   pkgs.github-desktop
-   pkgs.mangohud
-   pkgs.protonup
-   pkgs.mission-center
-   pkgs.openfortivpn
-   pkgs.fprintd
-   pkgs.gh
-   pkgs.git
-   pkgs.fastfetch
-   pkgs.btop
-   pkgs.iftop
-   pkgs.strawberry
-   pkgs.git-credential-manager
-   pkgs.wireguard-ui
-   pkgs.wireguard-tools
-   pkgs.unrar
+    # Core editors / fetch / helpers (useful at system level)
+    vim
+    wget
+    python3
+    git
+    fastfetch
+    btop
+    iftop
+    nh
+    screen
+    nettools
+    dos2unix
+    warp-terminal
+
+    # Archivers / utils
+    unrar
+    p7zip
+    dmg2img
+    tesseract
+    cabextract
+    libguestfs-with-appliance
+
+    # Gaming / hardware related tools that make sense system-wide
+    oversteer
+    linuxConsoleTools
+
+    # Networking / connectivity (Plasma + NetworkManager integration, VPN)
+    kdePackages.plasma-nm
+    kdePackages.networkmanager-qt
+    kdePackages.modemmanager-qt
+    networkmanager
+    networkmanagerapplet
+    pptp
+    ppp
+    wireguard-tools
+
+    # Steam integration bits
+    steam
+    gh
+
+    # Fingerprint (accompanies the service)
+    fprintd
   ];
  environment.sessionVariables = {
     STEAM_EXTRA_COMPAT_TOOLS_PATHS =
       "\${HOME}/.steam/root/compatibilitytools.d";
 };
+# Fingerprint reader support
+services.fprintd.enable = true;
+
+# Firmware updates (highly recommended for this sensor)
+services.fwupd.enable = true;
+
+hardware.steam-hardware.enable = true;
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
@@ -190,7 +200,6 @@ nix.settings.experimental-features = [ "nix-command" "flakes" ];
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "24.11"; # Did you read the comment?
+  system.stateVersion = "26.05"; # Did you read the comment?
 
 }
-
