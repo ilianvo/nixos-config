@@ -19,6 +19,7 @@
     vscodium
     zed-editor
     kdePackages.kate
+    brave
 
     # Media & productivity
     mpv
@@ -38,6 +39,7 @@
     mangohud
     protonup-ng
     lact
+    protonup-qt
 
     # Tools & misc personal
     qbittorrent
@@ -52,16 +54,27 @@
     # Terminal
     ghostty
     wezterm
+
+    # music converts
+    yt-dlp
+    ffmpeg
+    flacon
+    flac
+    lame
+    vorbis-tools
+    opusTools
+    wavpack
+
   ];
 
   # Git configuration (moved here from system-level programs.git).
   # This is the proper place for per-user git settings and credentials.
   programs.git = {
     enable = true;
-
+    lfs.enable = true;
     # Uncomment and fill these if desired:
-      userName = "ilianvo";
-      userEmail = "ilianvo@abv.bg";
+    #  userName = "ilianvo";
+    # userEmail = "ilianvo@abv.bg";
 
     settings = {
       credential.helper = "manager";
@@ -69,6 +82,25 @@
       credential.credentialStore = "cache";
     };
   };
+
+
+
+  xdg.enable = true;
+
+  xdg.dataFile."kio/servicemenus/wezterm-here.desktop".text = ''
+    [Desktop Entry]
+    Type=Service
+    ServiceTypes=KonqPopupMenu/Plugin
+    MimeType=inode/directory;
+    Actions=OpenWezTermHere;
+    X-KDE-Priority=TopLevel
+    Icon=org.wezterm.WezTerm
+
+    [Desktop Action OpenWezTermHere]
+    Name=Open WezTerm Here
+    Icon=org.wezterm.WezTerm
+    Exec=wezterm start --cwd "%f"
+  '';
 
   # Example of other useful program modules you can enable/configure:
   # programs.bash.enable = true;

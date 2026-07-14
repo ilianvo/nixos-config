@@ -15,7 +15,7 @@
     let
       system = "x86_64-linux";
     in {
-      nixosConfigurations.nixguru = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.nixosmain = nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
           ./configuration.nix

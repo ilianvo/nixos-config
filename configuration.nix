@@ -17,8 +17,10 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelModules = ["hid-universal-pidff"];
   boot.kernelParams = [ "amdgpu.ppfeaturemask=0xffffffff" ];
+  boot.supportedFilesystems = [ "ntfs" ];
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  networking.hostName = "nixguru"; # Define your hostname.
+  networking.hostName = "nixosmain"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -48,6 +50,7 @@ services.logind.settings.Login = {
   # Set your time zone.
   time.timeZone = "Europe/Sofia";
 
+
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
@@ -63,6 +66,7 @@ services.logind.settings.Login = {
     LC_TIME = "bg_BG.UTF-8";
   };
 
+services.udev.packages = with pkgs; [ oversteer ];
 
 services.netbird = {
   enable = true;                    # Enables the CLI and core service
@@ -80,10 +84,11 @@ services.netbird = {
 
   # Configure keymap in X11
   services.xserver.xkb = {
-    layout = "us";
-    variant = "";
+      layout  = "us,bg";
+      variant = ",phonetic";
+      options = "grp:alt_shift_toggle";
   };
-  
+
   # Enable lact for GPU monitoring
   services.lact.enable = true;
 
@@ -129,6 +134,22 @@ services.netbird = {
 
   # Git configuration moved to Home Manager (see home.nix) for proper per-user setup.
 
+# === Graphics / Vulkan support ===
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;                    # Important for some Vulkan apps
+    extraPackages = with pkgs; [
+      vulkan-loader
+      vulkan-validation-layers
+      vulkan-tools                 # For vulkaninfo command
+      mesa                     # AMD Vulkan driver (good fallback)
+    ];
+  };
+
+
+hardware.amdgpu = {
+    opencl.enable = true;          # Helps with compute in general
+  };
 
 services.ollama = {
   enable = true;
@@ -137,6 +158,8 @@ services.ollama = {
   package = pkgs.ollama-rocm;
   # Optional: preload popular models
     environmentVariables = {
+    OLLAMA_VULKAN = "1";                    # ← Enables Vulkan backend
+    OLLAMA_FLASH_ATTENTION = "1";
     HSA_OVERRIDE_GFX_VERSION = "10.1.0";   # Key workaround for 5700 XT (gfx1010)
     # HCC_AMDGPU_TARGET = "gfx1010";       # Sometimes needed, try if above isn't enough
   };
@@ -175,6 +198,7 @@ boot.initrd.kernelModules = [ "amdgpu" ];
     tesseract
     cabextract
     libguestfs-with-appliance
+    ntfs3g
 
     # Gaming / hardware related tools that make sense system-wide
     oversteer
@@ -191,12 +215,21 @@ boot.initrd.kernelModules = [ "amdgpu" ];
     steam
     gh
 
+    # Vulkan monitor
+    vulkan-tools
+    radeontop
+    rocmPackages.rocm-smi
+
   ];
  environment.sessionVariables = {
     STEAM_EXTRA_COMPAT_TOOLS_PATHS =
       "\${HOME}/.steam/root/compatibilitytools.d";
 };
 
+
+programs.steam.extraCompatPackages = with pkgs; [
+    proton-ge-bin
+  ];
 
 hardware.steam-hardware.enable = true;
   # Some programs need SUID wrappers, can be configured further or are
@@ -208,13 +241,23 @@ hardware.steam-hardware.enable = true;
   # };
 nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+
+fileSystems."/mnt/data" = {
+    device = "/dev/disk/by-uuid/ca4000b3-d702-40d5-bd0a-2f02810b5736";
+    fsType = "ext4";
+    options = [
+      "defaults"
+      "noatime"
+    ];
+  };
+
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
    services.openssh.enable = true;
 
   # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
+   networking.firewall.allowedTCPPorts = [ 11434 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
    networking.firewall.enable = true;
