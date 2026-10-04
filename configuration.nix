@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, pkgs-unstable, ... }:
 
 {
   imports =
@@ -69,8 +69,14 @@ services.logind.settings.Login = {
 services.udev.packages = with pkgs; [ oversteer ];
 
 services.netbird = {
-  enable = true;                    # Enables the CLI and core service
+  enable = true;
+  package = pkgs-unstable.netbird;
+
+  # For the desktop UI / tray app
+  ui.enable = false;                    # recommended if you use the GUI
+  ui.package = pkgs-unstable.netbird-ui;
 };
+
   # Enable the X11 windowing system.
   # You can disable this if you're only using the Wayland session.
   services.xserver.enable = true;
@@ -191,6 +197,9 @@ boot.initrd.kernelModules = [ "amdgpu" ];
     dos2unix
     warp-terminal
     smartmontools
+    yt-dlp
+    ffmpeg
+
     # Archivers / utils
     unrar
     p7zip
@@ -199,10 +208,12 @@ boot.initrd.kernelModules = [ "amdgpu" ];
     cabextract
     libguestfs-with-appliance
     ntfs3g
+    pavucontrol
 
     # Gaming / hardware related tools that make sense system-wide
     oversteer
     linuxConsoleTools
+    steam-run
 
     # Networking / connectivity (Plasma + NetworkManager integration, VPN)
     kdePackages.plasma-nm
@@ -214,12 +225,16 @@ boot.initrd.kernelModules = [ "amdgpu" ];
     # Steam integration bits
     steam
     gh
+    heroic
 
     # Vulkan monitor
     vulkan-tools
     radeontop
     rocmPackages.rocm-smi
 
+    # Grok
+    pkgs-unstable.grok-build
+    onlyoffice-desktopeditors
   ];
  environment.sessionVariables = {
     STEAM_EXTRA_COMPAT_TOOLS_PATHS =

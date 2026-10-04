@@ -4,7 +4,7 @@
 #
 # See: https://nix-community.github.io/home-manager/
 
-{ config, pkgs, ... }:
+{ config, pkgs, pkgs-unstable, ... }:
 
 {
   # Basic user info (required)
@@ -65,6 +65,8 @@
     opusTools
     wavpack
 
+   # AI agent
+    pkgs-unstable.grok-build
   ];
 
   # Git configuration (moved here from system-level programs.git).
