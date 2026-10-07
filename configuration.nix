@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, pkgs-unstable, ... }:
 
 {
   imports =
@@ -26,6 +26,9 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
+#  networking.localCommands = ''
+ #   ip route add 192.168.1.15/32 dev nixos-thinkpad || true
+  #'';
 
   # Set your time zone.
   time.timeZone = "Europe/Sofia";
@@ -104,15 +107,8 @@
   programs.steam.gamescopeSession.enable = true;
   programs.gamemode.enable = true;
 
-  # Git configuration moved to Home Manager (see home.nix) for proper per-user setup.
-
-nixpkgs.config.permittedInsecurePackages = [
-  "electron-39.8.10"
-];
-
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.allowBroken = true;
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   #
@@ -133,6 +129,9 @@ nixpkgs.config.permittedInsecurePackages = [
     nettools
     dos2unix
     warp-terminal
+    murmur
+    wezterm
+    smartmontools
 
     # Archivers / utils
     unrar
@@ -167,6 +166,16 @@ nixpkgs.config.permittedInsecurePackages = [
     STEAM_EXTRA_COMPAT_TOOLS_PATHS =
       "\${HOME}/.steam/root/compatibilitytools.d";
 };
+
+services.netbird = {
+  enable = true;
+  package = pkgs-unstable.netbird;
+
+  # For the desktop UI / tray app
+  ui.enable = false;                    # recommended if you use the GUI
+  ui.package = pkgs-unstable.netbird-ui;
+};
+
 # Fingerprint reader support
 services.fprintd.enable = true;
 

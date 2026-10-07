@@ -19,6 +19,7 @@
     vscodium
     zed-editor
     kdePackages.kate
+    brave
 
     # Media & productivity
     mpv
@@ -31,7 +32,6 @@
     signal-desktop
     vesktop
     syncthing
-    bitwarden-desktop
     zoom-us
     rustdesk-flutter
 
@@ -49,6 +49,9 @@
 
     # Git credential helper (used by the git config below)
     git-credential-manager
+
+    # Chess
+
   ];
 
   # Git configuration (moved here from system-level programs.git).
